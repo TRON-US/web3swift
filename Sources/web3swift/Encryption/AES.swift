@@ -150,7 +150,11 @@ struct AES128 {
             try CCCryptorUpdate(cryptor, encryptedBytes, input.count, &outBytes, outBytes.count, &outLength).check()
         }
         length += outLength
-        try CCCryptorFinal(cryptor, &outBytes + outLength, outBytes.count, &outLength).check()
+        let oldcount = outBytes.count
+        outBytes.withUnsafeMutableBytes { ptr in
+            _ = memset(ptr.baseAddress! + outLength, 0, length)
+        }
+        try CCCryptorFinal(cryptor, &outBytes, oldcount, &outLength).check()
         length += outLength
         
         return Data(bytes: UnsafePointer<UInt8>(outBytes), count: length)
