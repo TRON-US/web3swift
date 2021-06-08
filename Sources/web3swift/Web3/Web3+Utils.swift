@@ -209,6 +209,14 @@ extension Web3Utils {
         return try Web3Utils.publicToAddress(publicKey)
     }
 
+    /// returns the Ethereum address from recoverable secp256k1 signature.
+    public static func getAddressFromSignature(_ personalMessage: Data, signature: String) throws -> Address {
+        let signatureData = try signature.dataFromHex()
+        guard signatureData.count == 65 else { throw Web3UtilsError.invalidSignatureLength }
+        let publicKey = try SECP256K1.recoverPublicKey(hash: personalMessage, signature: signatureData)
+        return try Web3Utils.publicToAddress(publicKey)
+    }
+
     /// Recover the Ethereum address from recoverable secp256k1 signature.
     /// Takes a hash of some message. What message is hashed should be checked by user separately.
     ///
